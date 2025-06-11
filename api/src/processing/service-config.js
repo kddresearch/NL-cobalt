@@ -90,7 +90,9 @@ export const services = {
             "r/u_:user/comments/:id/:title",
             "r/u_:user/comments/:id/comment/:commentId",
 
-            "r/:sub/s/:shareId"
+            "r/:sub/s/:shareId",
+
+            "video/:shortId",
         ],
         subdomains: "*",
     },
@@ -114,6 +116,7 @@ export const services = {
             "add/:username",
             "u/:username",
             "t/:shortLink",
+            "o/:spotlightId",
         ],
         subdomains: ["t", "story"],
     },
@@ -136,12 +139,13 @@ export const services = {
     tiktok: {
         patterns: [
             ":user/video/:postId",
+            "i18n/share/video/:postId",
             ":shortLink",
             "t/:shortLink",
             ":user/photo/:postId",
             "v/:postId.html"
         ],
-        subdomains: ["vt", "vm", "m"],
+        subdomains: ["vt", "vm", "m", "t"],
     },
     tumblr: {
         patterns: [
@@ -173,7 +177,8 @@ export const services = {
             ":id",
             "video/:id",
             ":id/:password",
-            "/channels/:user/:id"
+            "/channels/:user/:id",
+            "groups/:groupId/videos/:id"
         ],
         subdomains: ["player"],
     },
@@ -203,7 +208,8 @@ export const services = {
         patterns: [
             "watch?v=:id",
             "embed/:id",
-            "watch/:id"
+            "watch/:id",
+            "v/:id"
         ],
         subdomains: ["music", "m"],
     }
