@@ -33,7 +33,7 @@ import Cookie from "./cookie/cookie.js";
 
 let freebind;
 
-export default async function({ host, patternMatch, params, isSession, inputCookies }) {
+export default async function({ host, patternMatch, params, authType, inputCookies }) {
     const { url } = params;
     assert(url instanceof URL);
     let dispatcher, requestIP;
@@ -75,6 +75,17 @@ export default async function({ host, patternMatch, params, isSession, inputCook
             });
         }
 
+        // youtubeHLS will be fully removed in the future
+        let youtubeHLS = params.youtubeHLS;
+        const hlsEnv = env.enableDeprecatedYoutubeHls;
+
+        if (hlsEnv === "never" || (hlsEnv === "key" && authType !== "key")) {
+            youtubeHLS = false;
+        }
+
+        const subtitleLang =
+            params.subtitleLang !== "none" ? params.subtitleLang : undefined;
+
         switch (host) {
             case "twitter":
                 r = await twitter({
@@ -82,7 +93,8 @@ export default async function({ host, patternMatch, params, isSession, inputCook
                     index: patternMatch.index - 1,
                     toGif: !!params.convertGif,
                     alwaysProxy: params.alwaysProxy,
-                    dispatcher
+                    dispatcher,
+                    subtitleLang
                 });
                 break;
 
@@ -91,7 +103,8 @@ export default async function({ host, patternMatch, params, isSession, inputCook
                     ownerId: patternMatch.ownerId,
                     videoId: patternMatch.videoId,
                     accessKey: patternMatch.accessKey,
-                    quality: params.videoQuality
+                    quality: params.videoQuality,
+                    subtitleLang,
                 });
                 break;
 
@@ -111,16 +124,18 @@ export default async function({ host, patternMatch, params, isSession, inputCook
                     dispatcher,
                     id: patternMatch.id.slice(0, 11),
                     quality: params.videoQuality,
-                    format: params.youtubeVideoCodec,
+                    codec: params.youtubeVideoCodec,
+                    container: params.youtubeVideoContainer,
                     isAudioOnly,
                     isAudioMuted,
                     dubLang: params.youtubeDubLang,
-                    youtubeHLS: params.youtubeHLS,
+                    youtubeHLS,
+                    subtitleLang,
                 }
 
                 if (url.hostname === "music.youtube.com" || isAudioOnly) {
                     fetchInfo.quality = "1080";
-                    fetchInfo.format = "vp9";
+                    fetchInfo.codec = "vp9";
                     fetchInfo.isAudioOnly = true;
                     fetchInfo.isAudioMuted = false;
 
@@ -147,6 +162,7 @@ export default async function({ host, patternMatch, params, isSession, inputCook
                     isAudioOnly,
                     h265: params.allowH265,
                     alwaysProxy: params.alwaysProxy,
+                    subtitleLang,
                     cookies: cookies,
                 });
                 break;
@@ -165,6 +181,7 @@ export default async function({ host, patternMatch, params, isSession, inputCook
                     password: patternMatch.password,
                     quality: params.videoQuality,
                     isAudioOnly,
+                    subtitleLang,
                 });
                 break;
 
@@ -216,6 +233,7 @@ export default async function({ host, patternMatch, params, isSession, inputCook
                     key: patternMatch.key,
                     quality: params.videoQuality,
                     isAudioOnly,
+                    subtitleLang,
                 });
                 break;
 
@@ -232,7 +250,8 @@ export default async function({ host, patternMatch, params, isSession, inputCook
 
             case "loom":
                 r = await loom({
-                    id: patternMatch.id
+                    id: patternMatch.id,
+                    subtitleLang,
                 });
                 break;
 
@@ -304,11 +323,12 @@ export default async function({ host, patternMatch, params, isSession, inputCook
         }
 
         let localProcessing = params.localProcessing;
-
         const lpEnv = env.forceLocalProcessing;
+        const shouldForceLocal = lpEnv === "always" || (lpEnv === "session" && authType === "session");
+        const localDisabled = (!localProcessing || localProcessing === "none");
 
-        if (lpEnv === "always" || (lpEnv === "session" && isSession)) {
-            localProcessing = true;
+        if (shouldForceLocal && localDisabled) {
+            localProcessing = "preferred";
         }
 
         return matchAction({
@@ -322,7 +342,7 @@ export default async function({ host, patternMatch, params, isSession, inputCook
             convertGif: params.convertGif,
             requestIP,
             audioBitrate: params.audioBitrate,
-            alwaysProxy: params.alwaysProxy,
+            alwaysProxy: params.alwaysProxy || localProcessing === "forced",
             localProcessing,
         })
     } catch {
