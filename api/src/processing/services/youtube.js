@@ -224,7 +224,7 @@ export default async function (o) {
 
     let info;
     try {
-        info = await yt.getBasicInfo(o.id, innertubeClient);
+        info = await yt.getBasicInfo(o.id, { client: innertubeClient });
     } catch (e) {
         if (e?.info) {
             let errorInfo;
