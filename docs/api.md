@@ -71,6 +71,7 @@ all keys except for `url` are optional. value options are separated by `/`.
 | key               | type      | description/value                                               | default    |
 |:------------------|:----------|:----------------------------------------------------------------|:-----------|
 | `url`             | `string`  | source URL                                                      | *required* |
+| `cookies`         | `object`  | key-value pairs of custom cookies to pass to the service        | *none*     |
 | `audioBitrate`    | `string`  | `320 / 256 / 128 / 96 / 64 / 8` (kbps)                          | `128`      |
 | `audioFormat`     | `string`  | `best / mp3 / ogg / wav / opus`                                 | `mp3`      |
 | `downloadMode`    | `string`  | `auto / audio / mute`                                           | `auto`     |
@@ -80,6 +81,18 @@ all keys except for `url` are optional. value options are separated by `/`.
 | `alwaysProxy`     | `boolean` | always tunnel all files, even when not necessary                | `false`    |
 | `localProcessing` | `string`  | `disabled / preferred / forced`                                 | `disabled` |
 | `subtitleLang`    | `string`  | any valid ISO 639-1 language code                               | *none*     |
+
+##### cookie example
+```json
+{
+    "url": "https://www.tiktok.com/@tiktok/video/7106594312292453675",
+    "videoQuality": "1080",
+    "cookies": {
+        "sessionid": "your_session_id_here",
+        "tt_webid_v2": "your_tt_webid_here"
+    }
+}
+```
 
 #### service-specific options
 | key                     | type      | description/value                                 | default |
